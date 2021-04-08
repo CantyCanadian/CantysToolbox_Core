@@ -70,7 +70,7 @@ public class SceneReference : ISerializationCallbackReceiver
 #else
             // At runtime we rely on the stored path value which we assume was serialized correctly at build time.
             // See OnBeforeSerialize and OnAfterDeserialize.
-            return scenePath;
+            return _scenePath;
 #endif
         }
         set

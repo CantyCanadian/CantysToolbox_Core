@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
+#if UNITY_EDITOR
 public static class GUIUtil
 {
     public static GUIStyle CenterLabelStyle
@@ -55,3 +56,4 @@ public static class GUIUtil
         return scrollPosition;
     }
 }
+#endif

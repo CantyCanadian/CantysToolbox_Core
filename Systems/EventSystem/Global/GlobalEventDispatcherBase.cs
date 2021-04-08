@@ -14,7 +14,8 @@ namespace Canty.EventSystem
 
         public static GlobalEventDispatcherBase<EventBaseType> GetDispatcher()
         {
-            Debug.Assert(m_Dispatchers.TryGetValue(typeof(EventBaseType), out GlobalEventDispatcherBase dispatcher), $"No dispatcher using event type [{typeof(EventBaseType)}] to register listener to.");
+            bool success = m_Dispatchers.TryGetValue(typeof(EventBaseType), out GlobalEventDispatcherBase dispatcher);
+            Debug.Assert(success, $"No dispatcher using event type [{typeof(EventBaseType)}] to register listener to.");
 
             var eventDispatcher = dispatcher as GlobalEventDispatcherBase<EventBaseType>;
 
