@@ -10,15 +10,15 @@ namespace Canty.EventSystem
         where EventListenerType : EventListenerBase
         where EventBaseType : EventBase
     {
-        private Dictionary<Type, List<(EventListenerBase Listener, MethodInfo Method)>> m_Listeners = new Dictionary<Type, List<(EventListenerBase listener, MethodInfo method)>>();
-        private Queue<(EventBaseType Event, Type EventType)> m_EventQueue = new Queue<(EventBaseType Event, Type EventType)>();
+        private Dictionary<Type, List<(EventListenerBase Listener, MethodInfo Method)>> _listeners = new Dictionary<Type, List<(EventListenerBase listener, MethodInfo method)>>();
+        private Queue<(EventBaseType Event, Type EventType)> _eventQueue = new Queue<(EventBaseType Event, Type EventType)>();
 
         /// <summary>
         /// Since we can assure that events on the other doesn't change as they are sent, we're caching them here to prevent any mid-sending changes.
         /// </summary>
-        private Dictionary<Type, EventBaseType> m_EventCache = new Dictionary<Type, EventBaseType>();
+        private Dictionary<Type, EventBaseType> _eventCache = new Dictionary<Type, EventBaseType>();
 
-        private bool m_IsProcessing = false;
+        private bool _isProcessing = false;
 
         public int RegisterEventListener(EventListenerBase listener)
         {
@@ -32,22 +32,36 @@ namespace Canty.EventSystem
             {
                 if (method.Type == typeof(EventBaseType))
                 {
-                    if (!m_Listeners.TryGetValue(typeof(EventBaseType), out var values))
+                    if (!_listeners.TryGetValue(typeof(EventBaseType), out var values))
                     {
-                        m_Listeners.Add(typeof(EventBaseType), values = new List<(EventListenerBase Listener, MethodInfo Method)>());
+                        _listeners.Add(typeof(EventBaseType), values = new List<(EventListenerBase Listener, MethodInfo Method)>());
                     }
 
                     values.Add((listener, method.Method));
+
+                    foreach(var eventObject in _eventCache)
+                    {
+                        if (!eventObject.Value.GetIsInstant())
+                            method.Method.Invoke(listener, new object[] { eventObject });
+                    }
+
                     methodCount++;
                 }
                 else if (method.Type.IsSubclassOf(typeof(EventBaseType)))
                 {
-                    if (!m_Listeners.TryGetValue(method.Type, out var values))
+                    if (!_listeners.TryGetValue(method.Type, out var values))
                     {
-                        m_Listeners.Add(method.Type, values = new List<(EventListenerBase Listener, MethodInfo Method)>());
+                        _listeners.Add(method.Type, values = new List<(EventListenerBase Listener, MethodInfo Method)>());
                     }
 
                     values.Add((listener, method.Method));
+
+                    foreach (var eventObject in _eventCache)
+                    {
+                        if (eventObject.Key == method.Type && !eventObject.Value.GetIsInstant())
+                            method.Method.Invoke(listener, new object[] { Convert.ChangeType(eventObject.Value, eventObject.Key) });
+                    }
+
                     methodCount++;
                 }
             }
@@ -59,24 +73,24 @@ namespace Canty.EventSystem
         {
             Type type = typeof(EventType);
 
-            if (!m_EventCache.ContainsKey(type))
-                m_EventCache.Add(type, Activator.CreateInstance<EventType>());
+            if (!_eventCache.ContainsKey(type))
+                _eventCache.Add(type, Activator.CreateInstance<EventType>());
 
-            m_EventQueue.Enqueue((eventObject, typeof(EventType)));
+            _eventQueue.Enqueue((eventObject, typeof(EventType)));
 
-            if (!m_IsProcessing)
+            if (!_isProcessing)
             {
-                m_IsProcessing = true;
+                _isProcessing = true;
 
-                while (m_EventQueue.Count > 0)
+                while (_eventQueue.Count > 0)
                 {
-                    var currentEvent = m_EventQueue.Dequeue();
+                    var currentEvent = _eventQueue.Dequeue();
 
                     // We're caching the latest of each events to prevent issues where an event object could be changed mid-way.
-                    m_EventCache[currentEvent.EventType].Copy(currentEvent.Event);
-                    currentEvent.Event = m_EventCache[currentEvent.EventType];
+                    _eventCache[currentEvent.EventType].Copy(currentEvent.Event);
+                    currentEvent.Event = _eventCache[currentEvent.EventType];
 
-                    if (m_Listeners.TryGetValue(typeof(EventBaseType), out var genericMethods))
+                    if (_listeners.TryGetValue(typeof(EventBaseType), out var genericMethods))
                     {
                         var eventParameter = new object[] { currentEvent.Event };
 
@@ -86,7 +100,7 @@ namespace Canty.EventSystem
                         }
                     }
 
-                    if (m_Listeners.TryGetValue(currentEvent.EventType, out var specificMethods))
+                    if (_listeners.TryGetValue(currentEvent.EventType, out var specificMethods))
                     {
                         var eventParameter = new object[] { Convert.ChangeType(currentEvent.Event, currentEvent.EventType) };
 
@@ -97,7 +111,7 @@ namespace Canty.EventSystem
                     }
                 }
 
-                m_IsProcessing = false;
+                _isProcessing = false;
             }
         }
     }

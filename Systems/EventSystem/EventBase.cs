@@ -11,6 +11,14 @@
         public abstract void Copy(EventBase other);
         public abstract string GetDebugData();
 
+        /// <summary>
+        /// Instant events aren't propagated to newly registered controllers, effectively making them "fire and forget".
+        /// </summary>
+        public virtual bool GetIsInstant()
+        {
+            return false;
+        }
+
         public EventBase(string origin)
         {
             Origin = origin;

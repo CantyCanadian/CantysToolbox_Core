@@ -14,14 +14,14 @@ namespace Canty.EventSystem
     public abstract class HierarchalEventListenerBase<EventBaseType> : EventListenerBase
         where EventBaseType : EventBase
     {
-        protected HierarchalEventDispatcherBase<EventBaseType> m_Dispatcher = null;
+        protected HierarchalEventDispatcherBase<EventBaseType> _dispatcher = null;
 
         protected virtual void Awake()
         {
-            m_Dispatcher = GetComponentInParent<HierarchalEventDispatcherBase<EventBaseType>>();
-            Debug.Assert(m_Dispatcher != null);
+            _dispatcher = GetComponentInParent<HierarchalEventDispatcherBase<EventBaseType>>();
+            Debug.Assert(_dispatcher != null);
 
-            m_Dispatcher.RegisterEventListener(this);
+            _dispatcher.RegisterEventListener(this);
         }
     }
 }

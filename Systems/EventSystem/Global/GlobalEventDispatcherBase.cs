@@ -10,7 +10,7 @@ namespace Canty.EventSystem
     public abstract class GlobalEventDispatcherBase<EventBaseType> : GlobalEventDispatcherBase
         where EventBaseType : EventBase
     {
-        [SerializeField] private bool m_ShowDebugLogs = false;
+        [SerializeField] private bool _showDebugLogs = false;
 
         public static GlobalEventDispatcherBase<EventBaseType> GetDispatcher()
         {
@@ -37,7 +37,7 @@ namespace Canty.EventSystem
         {
             int methodCount = m_DispatcherObject.RegisterEventListener(listener);
 
-            if (m_ShowDebugLogs && methodCount > 0)
+            if (_showDebugLogs && methodCount > 0)
                 Debug.Log($"[{GetType().Name}] : Registered listener [{listener.name}], methods registered [{methodCount}].");
         }
 
@@ -45,7 +45,7 @@ namespace Canty.EventSystem
         {
             m_DispatcherObject.SendEvent(eventObject);
 
-            if (m_ShowDebugLogs)
+            if (_showDebugLogs)
                 Debug.Log($"{eventObject.GetDebugData()}");
         }
 

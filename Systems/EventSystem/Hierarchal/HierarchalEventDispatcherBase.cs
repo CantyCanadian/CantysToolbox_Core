@@ -9,16 +9,16 @@ namespace Canty.EventSystem
     public class HierarchalEventDispatcherBase<EventBaseType> : MonoBehaviour
         where EventBaseType : EventBase
     {
-        protected EventDispatcherObject<HierarchalEventListenerBase<EventBaseType>, EventBaseType> m_DispatcherObject = new EventDispatcherObject<HierarchalEventListenerBase<EventBaseType>, EventBaseType>();
+        protected EventDispatcherObject<HierarchalEventListenerBase<EventBaseType>, EventBaseType> _dispatcherObject = new EventDispatcherObject<HierarchalEventListenerBase<EventBaseType>, EventBaseType>();
 
         public void RegisterEventListener(HierarchalEventListenerBase<EventBaseType> listener)
         {
-            m_DispatcherObject.RegisterEventListener(listener);
+            _dispatcherObject.RegisterEventListener(listener);
         }
 
         public void SendEvent<EventType>(EventType eventObject) where EventType : EventBaseType
         {
-            m_DispatcherObject.SendEvent(eventObject);
+            _dispatcherObject.SendEvent(eventObject);
         }
     }
 }

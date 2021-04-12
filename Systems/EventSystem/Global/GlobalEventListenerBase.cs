@@ -12,12 +12,12 @@ namespace Canty.EventSystem
     public abstract class GlobalEventListenerBase<EventBaseType> : EventListenerBase
         where EventBaseType : EventBase
     {
-        protected GlobalEventDispatcherBase<EventBaseType> m_Dispatcher = null;
+        protected GlobalEventDispatcherBase<EventBaseType> _dispatcher = null;
 
         protected virtual void Awake()
         {
-            m_Dispatcher = GlobalEventDispatcherBase<EventBaseType>.RegisterListener(this);
-            Debug.Assert(m_Dispatcher != null);
+            _dispatcher = GlobalEventDispatcherBase<EventBaseType>.RegisterListener(this);
+            Debug.Assert(_dispatcher != null);
         }
     }    
 }
