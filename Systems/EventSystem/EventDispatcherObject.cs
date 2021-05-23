@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
-using UnityEngine;
 
 namespace Canty.EventSystem
 {
@@ -42,7 +41,7 @@ namespace Canty.EventSystem
                     foreach(var eventObject in _eventCache)
                     {
                         if (!eventObject.Value.GetIsInstant())
-                            method.Method.Invoke(listener, new object[] { eventObject });
+                            method.Method.Invoke(listener, new object[] { eventObject.Value });
                     }
 
                     methodCount++;

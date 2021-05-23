@@ -30,7 +30,7 @@ namespace Canty
 
                 if (!s_Instance)
                 {
-                    if (Thread.CurrentThread == s_MainThreadReference)
+                    if (Thread.CurrentThread == s_MainThreadReference || !Application.isPlaying)
                     {
                         T find = FindObjectOfType<T>();
 
