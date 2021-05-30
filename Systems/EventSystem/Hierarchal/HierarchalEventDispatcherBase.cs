@@ -14,7 +14,7 @@ namespace Canty.EventSystem
             int methodCount = _dispatcherObject.RegisterEventListener(listener);
 
             if (_showDebugLogs && methodCount > 0)
-                Debug.Log($"<color=green>[{GetType().Name}]</color>\nRegistered listener [{listener.GetType().Name}], methods registered [{methodCount}].");
+                Debug.Log($"<color=lime>[{GetType().Name}]</color>\nRegistered listener [{listener.GetType().Name}], methods registered [{methodCount}].");
         }
 
         public void SendEvent<EventType>(EventType eventObject) where EventType : EventBaseType
@@ -22,7 +22,7 @@ namespace Canty.EventSystem
             _dispatcherObject.SendEvent(eventObject);
 
             if (_showDebugLogs)
-                Debug.Log($"<color=red>[{eventObject.Origin}]</color>\n{eventObject.GetDebugData()}");
+                Debug.Log($"<color=magenta>[{eventObject.Origin}]</color>\n{eventObject.GetDebugData()}");
         }
     }
 }
