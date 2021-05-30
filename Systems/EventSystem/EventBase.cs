@@ -6,7 +6,7 @@
     /// </summary>
     public abstract class EventBase
     {
-        public string Origin { get; private set; } = string.Empty;
+        public string Origin { get; protected set; } = string.Empty;
 
         public abstract void Copy(EventBase other);
         public abstract string GetDebugData();
@@ -23,8 +23,6 @@
         {
             Origin = origin;
         }
-
-        public EventBase() { }
     }
 
     /*

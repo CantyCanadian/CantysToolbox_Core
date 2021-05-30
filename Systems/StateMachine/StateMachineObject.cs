@@ -18,11 +18,10 @@ namespace Canty.StateMachineSystem
                 .Where(type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(stateType))
                 .Select(type => (StateType)Activator.CreateInstance(type))
                 .ToDictionary(instance => instance.GetStateEnum(), instance => instance);
-        }
 
-        public StateMachineObject(StateEnum defaultState, GameObject owner)
-            : base(defaultState, owner)
-        { }
+            foreach (StateType type in list.Values)
+                type.SetOwner(this as StateMachineObject<StateBase<StateEnum, ContextType>, StateEnum, ContextType>);
+        }
     }
 
     public class MonoStateMachineObject<StateType, StateEnum, ContextType> : StateMachineObjectBase<StateType, StateEnum, ContextType>
@@ -34,14 +33,13 @@ namespace Canty.StateMachineSystem
         {
             list = _owner.GetComponentsInChildren<StateType>()
                 .ToDictionary(obj => obj.GetStateEnum(), obj => obj);
-        }
 
-        public MonoStateMachineObject(StateEnum defaultState, GameObject owner)
-            : base(defaultState, owner)
-        { }
+            foreach(StateType type in list.Values)
+                type.SetOwner(this);
+        }
     }
 
-    public abstract class StateMachineObjectBase<StateType, StateEnum, ContextType>
+    public abstract class StateMachineObjectBase<StateType, StateEnum, ContextType> : StateMachineObjectBase<StateEnum>
         where StateType : IState<StateEnum, ContextType>
         where StateEnum : Enum
         where ContextType : StateMachineContextBase, new()
@@ -55,60 +53,52 @@ namespace Canty.StateMachineSystem
 
         protected GameObject _owner = null;
 
-        protected Action<StateEnum, StateEnum> _onStateChanged = null;
-
         protected abstract void GenerateStateList(ref Dictionary<StateEnum, StateType> list);
 
         protected virtual void UpdateContext(ref ContextType context) { }
 
-        public void RegisterOnStateChangedCallback(Action<StateEnum, StateEnum> callback)
-        {
-            if (_onStateChanged == null)
-            {
-                _onStateChanged = new Action<StateEnum, StateEnum>(callback);
-            }
-            else
-            {
-                _onStateChanged += callback;
-            }
-        }
-
-        public void ChangeState(StateEnum newState, bool force = false)
+        public override void ChangeState(StateEnum newState, bool force = false)
         {
             if (!force && CurrentState.Equals(newState))
                 return;
 
-            CurrentStateObject?.OnStateExit();
+            UpdateContext(ref _context);
+
+            CurrentStateObject?.OnStateExit(_context);
 
             StateEnum oldState = CurrentState;
             CurrentState = newState;
             CurrentStateObject = _stateObjects[newState];
 
-            CurrentStateObject?.OnStateEnter(oldState);
+            CurrentStateObject?.OnStateEnter(oldState, _context);
 
             _onStateChanged?.Invoke(oldState, newState);
         }
 
-        public void ChangeStateWithoutExit(StateEnum newState, bool force = false)
+        public override void ChangeStateWithoutExit(StateEnum newState, bool force = false)
         {
             if (!force && CurrentState.Equals(newState))
                 return;
+
+            UpdateContext(ref _context);
 
             StateEnum oldState = CurrentState;
             CurrentState = newState;
             CurrentStateObject = _stateObjects[newState];
 
-            CurrentStateObject?.OnStateEnter(oldState);
+            CurrentStateObject?.OnStateEnter(oldState, _context);
 
             _onStateChanged?.Invoke(oldState, newState);
         }
 
-        public void ChangeStateWithoutEnter(StateEnum newState, bool force = false)
+        public override void ChangeStateWithoutEnter(StateEnum newState, bool force = false)
         {
             if (!force && CurrentState.Equals(newState))
                 return;
 
-            CurrentStateObject?.OnStateExit();
+            UpdateContext(ref _context);
+
+            CurrentStateObject?.OnStateExit(_context);
 
             StateEnum oldState = CurrentState;
             CurrentState = newState;
@@ -123,11 +113,35 @@ namespace Canty.StateMachineSystem
             CurrentStateObject.OnStateUpdate(_context);
         }
 
-        public StateMachineObjectBase(StateEnum defaultState, GameObject owner)
+        public virtual void Initialize(StateEnum defaultState, GameObject owner)
         {
             _owner = owner;
             GenerateStateList(ref _stateObjects);
             ChangeState(defaultState, true);
         }
+    }
+
+    public abstract class StateMachineObjectBase<StateEnum>
+       where StateEnum : Enum
+    {
+        protected Action<StateEnum, StateEnum> _onStateChanged = null;
+
+        public void RegisterOnStateChangedCallback(Action<StateEnum, StateEnum> callback)
+        {
+            if (_onStateChanged == null)
+            {
+                _onStateChanged = new Action<StateEnum, StateEnum>(callback);
+            }
+            else
+            {
+                _onStateChanged += callback;
+            }
+        }
+
+        public abstract void ChangeState(StateEnum newState, bool force = false);
+
+        public abstract void ChangeStateWithoutExit(StateEnum newState, bool force = false);
+
+        public abstract void ChangeStateWithoutEnter(StateEnum newState, bool force = false);
     }
 }

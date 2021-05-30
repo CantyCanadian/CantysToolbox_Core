@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Canty.StateMachineSystem
+﻿namespace Canty.StateMachineSystem
 {
     public abstract class StateMachineContextBase { }
 }

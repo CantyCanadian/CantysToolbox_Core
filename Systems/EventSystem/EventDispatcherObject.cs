@@ -21,7 +21,7 @@ namespace Canty.EventSystem
 
         public int RegisterEventListener(EventListenerBase listener)
         {
-            var methods = listener.GetType().GetMethods()
+            var methods = listener.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                 .Select(method => (Method: method, Attribute: method.GetCustomAttribute<EventReceiverAttribute>(), Params: method.GetParameters()))
                 .Where(methodTuple => (methodTuple.Method.Name == "ReceiveEvent" || methodTuple.Attribute != null) && methodTuple.Params.Length == 1)
                 .Select(methodTuple => (Method: methodTuple.Method, Type: methodTuple.Params[0].ParameterType));
@@ -73,7 +73,7 @@ namespace Canty.EventSystem
             Type type = typeof(EventType);
 
             if (!_eventCache.ContainsKey(type))
-                _eventCache.Add(type, Activator.CreateInstance<EventType>());
+                _eventCache.Add(type, (EventType)Activator.CreateInstance(typeof(EventType), (object)string.Empty));
 
             _eventQueue.Enqueue((eventObject, typeof(EventType)));
 
