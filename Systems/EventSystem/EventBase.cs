@@ -8,7 +8,8 @@
     {
         public string Origin { get; protected set; } = string.Empty;
 
-        public abstract void Copy(EventBase other);
+        public abstract void Copy(EventBase eventObject);
+		
         public abstract string GetDebugData();
 
         /// <summary>
@@ -40,14 +41,12 @@
             Value2 = value2;
         }
 
-        public override void Copy(EventBase other)
+        public override void Copy(EventBase eventObject)
         {
-            if (other is DummyEvent)
+            if (eventObject is DummyEvent dummyEvent)
             {
-                DummyEvent dummy = other as DummyEvent;
-
-                Value1 = dummy.Value1;
-                Value2 = dummy.Value2;
+                Value1 = dummyEvent.Value1;
+                Value2 = dummyEvent.Value2;
             }
         }
 

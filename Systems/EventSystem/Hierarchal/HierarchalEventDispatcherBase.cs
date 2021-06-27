@@ -19,10 +19,10 @@ namespace Canty.EventSystem
 
         public void SendEvent<EventType>(EventType eventObject) where EventType : EventBaseType
         {
-            _dispatcherObject.SendEvent(eventObject);
-
             if (_showDebugLogs)
                 Debug.Log($"<color=magenta>[{eventObject.Origin}]</color>\n{eventObject.GetDebugData()}");
+
+            _dispatcherObject.SendEvent(eventObject);
         }
     }
 }
